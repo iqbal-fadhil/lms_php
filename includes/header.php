@@ -27,6 +27,16 @@
                 <li class="nav-item">
                     <a class="nav-link" href="task_management.php">Tasks</a>
                 </li>
+                                    <!-- Show Logout Button if Logged In -->
+                                    <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']): ?>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-outline-danger" href="login.php">Login</a>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="../logout.php">Logout</a>
+                        </li>
+                    <?php endif; ?>
             </ul>
         </div>
     </div>
