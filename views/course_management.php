@@ -20,8 +20,8 @@ $result = $conn->query("SELECT id, title, description, created_by FROM courses")
             <tr>
                 <th>ID</th>
                 <th>Title</th>
-                <th class="d-none">Description</th>
-                <th>Created By</th>
+                <th>Description</th>
+                <th>Created At</th>
                 <th>Actions</th>
             </tr>
         </thead>
@@ -30,13 +30,10 @@ $result = $conn->query("SELECT id, title, description, created_by FROM courses")
             <tr>
                 <td><?= $course['id'] ?></td>
                 <td><?= $course['title'] ?></td>
-                <td class="d-none">
-                    <!-- Show only an excerpt of the description -->
-                    <?= strlen($course['description']) > 100 ? substr($course['description'], 0, 100) . '...' : $course['description']; ?>
-                </td>
+                <td><?= $course['description'] ?></td>
                 <td><?= $course['created_by'] ?></td>
                 <td>
-                    <button class="btn btn-primary btn-sm" onclick="openEditCourseModal(<?= $course['id'] ?>, '<?= addslashes($course['title']) ?>', '<?= addslashes(str_replace(["\r", "\n"], ['\\r', '\\n'], $course['description'])) ?>')">Edit</button>
+                    <button class="btn btn-primary btn-sm" onclick="openEditCourseModal(<?= $course['id'] ?>, '<?= $course['title'] ?>', '<?= $course['description'] ?>')">Edit</button>
                     <button class="btn btn-danger btn-sm" onclick="deleteCourse(<?= $course['id'] ?>)">Delete</button>
                 </td>
             </tr>
@@ -61,7 +58,6 @@ $result = $conn->query("SELECT id, title, description, created_by FROM courses")
                     </div>
                     <div class="mb-3">
                         <label for="description" class="form-label">Description</label>
-                        <!-- CKEditor text area -->
                         <textarea class="form-control" id="description" name="description" required></textarea>
                     </div>
                     <button type="submit" class="btn btn-primary">Add Course</button>
@@ -83,13 +79,13 @@ $result = $conn->query("SELECT id, title, description, created_by FROM courses")
                 <form id="editCourseForm">
                     <input type="hidden" id="editCourseId" name="id">
                     <div class="mb-3">
-                        <label for="editCourseTitle" class="form-label">Title</label>
-                        <input type="text" class="form-control" id="editCourseTitle" name="title" required>
+                        <label for="editTitle" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="editTitle" name="title" required>
                     </div>
                     <div class="mb-3">
-                        <label for="editCourseDescription" class="form-label">Description</label>
-                        <textarea id="editCourseDescription" name="description" required></textarea>
-                    </div>                    
+                        <label for="editDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="editDescription" name="description" required></textarea>
+                    </div>
                     <button type="submit" class="btn btn-primary">Update Course</button>
                 </form>
             </div>
@@ -97,73 +93,76 @@ $result = $conn->query("SELECT id, title, description, created_by FROM courses")
     </div>
 </div>
 
-<!-- Include CKEditor -->
-<script src="https://cdn.ckeditor.com/4.17.1/standard/ckeditor.js"></script>
-<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script> <!-- Include jQuery -->
-
+<!-- JavaScript for handling async operations -->
 <script>
-    // Initialize CKEditor on the description field
-    CKEDITOR.replace('description');
-    CKEDITOR.replace('editCourseDescription'); // Initialize CKEditor for editing
-
-    function openEditCourseModal(id, title, description) {
-        $('#editCourseId').val(id);
-        $('#editCourseTitle').val(title);
-        CKEDITOR.instances.editCourseDescription.setData(description); // Set the description in the editor
-        $('#editCourseModal').modal('show'); // Show the modal
+document.getElementById('createCourseForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    const response = await fetch('create_course.php', {
+        method: 'POST',
+        body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+        alert(result.message);
+        location.reload(); // Refresh the page
+    } else {
+        alert(result.message);
     }
+});
 
-    document.getElementById('createCourseForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+function openEditCourseModal(courseId, title, description) {
+    document.getElementById('editCourseId').value = courseId;
+    document.getElementById('editTitle').value = title;
+    document.getElementById('editDescription').value = description;
+    const modal = new bootstrap.Modal(document.getElementById('editCourseModal'));
+    modal.show();
+}
 
-        // Get the HTML content from CKEditor and assign it to the hidden field
-        const descriptionHtml = CKEDITOR.instances.description.getData();
-        const formData = new FormData(this);
-        formData.set('description', descriptionHtml);
+document.getElementById('editCourseForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    const response = await fetch('edit_course.php', {
+        method: 'POST',
+        body: formData
+    });
+    
+    const result = await response.json();
+    
+    if (result.success) {
+        alert(result.message);
+        location.reload(); // Refresh the page
+    } else {
+        alert(result.message);
+    }
+});
 
-        // Submit form data with AJAX
-        fetch('create_course.php', {
+async function deleteCourse(courseId) {
+    if (confirm('Are you sure you want to delete this course?')) {
+        const formData = new FormData();
+        formData.append('id', courseId);
+
+        const response = await fetch('delete_course.php', {
             method: 'POST',
             body: formData
-        }).then(response => response.json())
-          .then(result => {
-              if (result.success) {
-                  alert(result.message);
-                  location.reload(); // Reload the page to update course list
-              } else {
-                  alert(result.message);
-              }
-          }).catch(error => {
-              console.error('Error:', error);
-              alert('An error occurred while creating the course.');
-          });
-    });
+        });
 
-    document.getElementById('editCourseForm').addEventListener('submit', function(e) {
-        e.preventDefault();
-
-        // Get the HTML content from CKEditor for the edit form
-        const descriptionHtml = CKEDITOR.instances.editCourseDescription.getData();
-        const formData = new FormData(this);
-        formData.set('description', descriptionHtml);
-
-        // Submit form data with AJAX
-        fetch('edit_course.php', {
-            method: 'POST',
-            body: formData
-        }).then(response => response.json())
-          .then(result => {
-              if (result.success) {
-                  alert(result.message);
-                  location.reload(); // Reload the page to update course list
-              } else {
-                  alert(result.message);
-              }
-          }).catch(error => {
-              console.error('Error:', error);
-              alert('An error occurred while updating the course.');
-          });
-    });
+        const result = await response.json();
+        
+        if (result.success) {
+            alert(result.message);
+            location.reload(); // Refresh the page
+        } else {
+            alert(result.message);
+        }
+    }
+}
 </script>
 
 <?php include('../includes/footer.php'); ?>

@@ -1,22 +1,19 @@
 <?php
-session_start();
-require 'db.php'; // Assuming your db.php file contains the database connection
+include('../includes/auth.php');
+include('../includes/db.php');
 
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
-    $id = $_POST['id'];
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    $course_id = $_POST['id'];
 
-    // Prepare the delete statement
+    // Delete the course from the database
     $stmt = $conn->prepare("DELETE FROM courses WHERE id = ?");
-    $stmt->bind_param("i", $id);
+    $stmt->bind_param("i", $course_id);
 
-    // Check if deletion was successful
     if ($stmt->execute()) {
         echo json_encode(['success' => true, 'message' => 'Course deleted successfully']);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Failed to delete the course']);
+        echo json_encode(['success' => false, 'message' => 'Failed to delete course']);
     }
-
-    $stmt->close();
     exit();
 }
 ?>
