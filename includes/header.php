@@ -34,20 +34,21 @@ if (session_status() == PHP_SESSION_NONE) {
                 <li class="nav-item">
                     <a class="nav-link" href="course_management.php">Courses</a>
                 </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a class="nav-link" href="task_management.php">Tasks</a>
-                </li>
+                </li> -->
 
-                <!-- Show Logout Button if Logged In -->
-                <?php if (isset($_SESSION['logged_in']) && $_SESSION['logged_in']): ?>
+                <?php if( isset($_SESSION['username']) && !empty($_SESSION['username']) )
+                {
+                ?>
                     <li class="nav-item">
-                        <a class="nav-link" href="../logout.php">Logout</a>
+                        <a class="nav-link" href="logout.php">Logout</a>
                     </li>
-                <?php else: ?>
+                <?php }else{ ?>
                     <li class="nav-item">
                         <a class="nav-link" href="login.php">Login</a>
                     </li>
-                <?php endif; ?>
+                <?php } ?>
             </ul>
         </div>
     </div>

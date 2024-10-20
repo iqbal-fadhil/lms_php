@@ -48,9 +48,3 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </div>
 
 <?php include('../includes/footer.php'); ?>
-
-
-<?php
-print_r($_SESSION);
-echo '</pre>';
-?>
