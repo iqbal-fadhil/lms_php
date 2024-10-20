@@ -1,9 +1,18 @@
 <?php
 include('../includes/db.php');
 
+// Function to sanitize HTML input
+function sanitize_html($input) {
+    // Allow only certain HTML tags
+    return strip_tags($input, '<h1><h2><h3><h4><h5><h6><p><br><strong><em><ul><ol><li>');
+}
+
+header('Content-Type: application/json'); // Ensure the response is JSON
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $title = $_POST['title'];
-    $description = $_POST['description'];
+    // $description = $_POST['description'];
+    $description = sanitize_html($_POST['description']); // Sanitize the description
     $metadata = $_POST['metadata'];  // Capture metadata from form
 
     // Handle Image Upload

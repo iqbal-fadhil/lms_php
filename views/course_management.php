@@ -85,6 +85,7 @@ $is_admin = ($_SESSION['role'] === 'admin');
           <div class="mb-3">
             <label for="description" class="form-label">Course Description</label>
             <textarea class="form-control" id="description" name="description" required></textarea>
+            <small>Use HTML tags for formatting (e.g., &lt;h1&gt;, &lt;p&gt;)</small>
           </div>
           <div class="mb-3">
             <label for="metadata" class="form-label">Course Metadata</label>
