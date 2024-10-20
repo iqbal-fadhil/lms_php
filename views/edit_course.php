@@ -6,6 +6,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $course_id = $_POST['id'];
     $title = $_POST['title'];
     $description = $_POST['description'];
+    $metadata = $_POST['metadata'];
 
     // Update the course in the database
     $stmt = $conn->prepare("UPDATE courses SET title = ?, description = ? WHERE id = ?");

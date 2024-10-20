@@ -4,6 +4,7 @@ include('../includes/db.php');
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $title = $_POST['title'];
     $description = $_POST['description'];
+    $metadata = $_POST['metadata'];  // Capture metadata from form
 
     // Handle Image Upload
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
@@ -21,14 +22,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $videoPath = null;
     }
 
-    // Insert course into the database
-    $stmt = $conn->prepare("INSERT INTO courses (title, description, image, video) VALUES (?, ?, ?, ?)");
-    $stmt->bind_param('ssss', $title, $description, $imagePath, $videoPath);
+    // Insert course into the database with metadata
+    $stmt = $conn->prepare("INSERT INTO courses (title, description, image, video, metadata) VALUES (?, ?, ?, ?, ?)");
+    if ($stmt === false) {
+        die("Prepare failed: " . htmlspecialchars($conn->error));  // Debug error
+    }
+    
+    $stmt->bind_param('sssss', $title, $description, $imagePath, $videoPath, $metadata);
     $stmt->execute();
 
     if ($stmt->affected_rows > 0) {
         echo json_encode(['success' => true, 'message' => 'Course created successfully.']);
     } else {
-        echo json_encode(['success' => false, 'message' => 'Failed to create course.']);
+        echo json_encode(['success' => false, 'message' => 'Failed to create course.', 'error' => $stmt->error]);
     }
+
+    $stmt->close();
 }
+?>
